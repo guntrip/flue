@@ -6,7 +6,7 @@
 
   include "functions.php";
 
-  // Return and output a list of all lights.
+  // Return an output a list of all lights.
   $lights = get($bridge["ip"], $bridge["username"], "lights");
 
   print_r($lights);
