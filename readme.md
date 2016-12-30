@@ -19,11 +19,9 @@ The settings live in `settings.php`. You can define each of the bulbs you want F
 "1" => [ "nickname" => "Ceiling",
          "mode" => "sun",
          "colour_mode" => "temp",
-         //"day" => ["r"=>255, "g"=> 0, "b" => 240],
-         //"night" => ["r"=>0, "g"=> 255, "b" =>12],
          "day" => 165,
          "night" => 468,
-         "minutes" => 25, // minutes before sunset to begin fade
+         "minutes" => 25,
          "sunrise_before" => 100]
 ```
 
