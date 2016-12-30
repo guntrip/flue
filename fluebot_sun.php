@@ -6,12 +6,10 @@ function sun($lightId, $sunSetting, $state) {
 
   echo "  Sun mode\n";
 
-  $time=time();
-  $time = strtotime("2016-12-31 07:50");
-
-  $vars=["hue"=>33582, "xy"=>[0.3476,0.3574]];
-
   $currentRgb = XYtoRgb($state["xy"][0], $state["xy"][1], $state["bri"]);
+
+  $time=time();
+  //$time = strtotime("2016-12-31 07:30"); // for fiddling.
 
   // Are we in daylight savings? :C Also calculates offset for other regions.
   $timezone = new DateTimeZone($settings["timezone"]);
@@ -20,85 +18,80 @@ function sun($lightId, $sunSetting, $state) {
   $server_dt = new DateTime("now", $server);
   $offset = ($timezone->getOffset($dt) - $server->getOffset($server_dt)) / 3600;
 
-  // Calculate sunset and when to begin.
+  // Calculate sunset and sunrise
   $sunset = date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
-  $start = $sunset - ($sunSetting["minutes"]*60);
-  $next_sunset = $sunset + 86400;
-
-  // Calculate sunrise for current day and when to begin that shift
   $sunrise = date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
 
-    // If the sun has risen today, we want the sunrise for *tomorrow*
-    $minutes_after_midnight = date("h")*60 + date("i");
-    $sunrise_after_midnight = date("h", $sunrise)*60 + date("i", $sunrise);
-    if ( ($minutes_after_midnight>$sunrise_after_midnight) && ($minutes_after_midnight<1440) ) {
-      $sunrise = $sunrise + 86400;
-    }
+  echo "  Sunset at ".date("H:i", $sunset)."\n";
+  echo "  Sunrise at ".date("H:i", $sunrise)." (-".$sunSetting["sunrise_before"]." minutes - ".date("H:i", ($sunrise-($sunSetting["sunrise_before"]*60))).")\n";
+  echo "  Transition time is ".$sunSetting["minutes"]." minutes\n";
 
-  $end = $sunrise - ($sunSetting["sunrise_before"]*60);
+  // Convert to minutes after midnight
+  $sunset = date("H", $sunset)*60 + date("i", $sunset);
+  $sunset_start = $sunset - $sunSetting["minutes"];
 
-  echo "  Sunset at ".date("dS H:i", $sunset)." (-".$sunSetting["minutes"]." minutes)\n";
-  echo "  Next sunrise at ".date("dS H:i", $sunrise)." (-".$sunSetting["sunrise_before"]." minutes)\n";
-  echo "  Next sunset at ".date("dS H:i", $next_sunset)."\n";
-  echo "  Current time: ".date("H:i", $time)." - ";
+  $sunrise = date("H", $sunrise)*60 + date("i", $sunrise) - $sunSetting["sunrise_before"];
+  $sunrise_start = $sunrise - $sunSetting["minutes"];
 
-  if ( ($time > $start) && ($time < $end) ) {
+  $now = date("H", $time)*60 + date("i", $time);
 
-    if ( $time < $sunset ) {
+  echo "  Current status: ".date("H:i", $time)." - ";
 
-      // Sun is setting, blend!
-      $percentage = 1-(($sunset-$time)/($sunSetting["minutes"]*60));
+  // Figure out the rgb or colour temperature to use.
+
+  if ($now>=$sunset_start) { // After sunset start time.
+
+    if ( $now < $sunset ) { // Sun is setting, blend!
+
+      $percentage = 1-(($sunset-$now)/($sunSetting["minutes"]));
       echo "Sun is setting (".round($percentage*100)."% complete)\n";
-
       $outcome = blend($sunSetting, $percentage, "sunset");
 
-    } else {
+    } else { // Sun has set. Simple.
 
-      // Sun has set. Simple.
-      echo "Night\n";
+      echo "Night*\n";
       $outcome = $sunSetting["night"];
 
     }
 
+  } elseif ( ($now>0) && ($now<$sunrise_start) ) { // After midnight, before sunrise.
 
-  } elseif ( ($time>$end) && ($time<$next_sunset) ) {
+    echo "Night\n";
+    $outcome = $sunSetting["night"];
 
+  } elseif ( ($now>=$sunrise_start) && ($now<$sunset_start) ) { // After sunrise start, before sunset.
 
-    if ($time > $sunrise) {
+    if ($now > $sunrise) { // Sun has risen, simple.
 
-      // Sun has risen, simple.
       echo "Day\n";
       $outcome = $sunSetting["day"];
 
-    } else {
+    } else { // Sun is rising. Blend!
 
-      // Sun is rising!
-      $percentage = 1-(($sunrise-$time)/($sunSetting["sunrise_before"]*60));
-      echo "Sun is rising (".round($percentage*100)."% complete)\n";
-
-      //$outcome = blend($sunSetting, $percentage, "sunset");
+      $percentage = 1-(($sunrise-$now)/($sunSetting["minutes"]));
+      echo "Sun is rising (".$percentage." - ".round($percentage*100)."% complete)\n";
+      $outcome = blend($sunSetting, $percentage, "sunrise");
 
     }
 
-
-  } else {
-    echo "Day\n";
-
-    $outcome = $sunSetting["day"];
-
   }
 
+  // If someothing has gone very wrong, give up.
   if (!isset($outcome)) {
     echo "  Error: couldn't decide on a colour, skipping.\n";
     return 0;
   }
 
+  // Set colour on bulb.
+
   if ($sunSetting["colour_mode"]=="rgb") {
 
+      // Calculate current RGB and see if we *need* to change anything
       if (!rgbMatch($outcome, $currentRgb)) {
 
         echo "  Adjusting to (r:".$outcome["r"].", g:".$outcome["g"].", b:".$outcome["b"].")\n";
 
+        // Conver to XY and brightness.
         $xy=rgbToXY($outcome);
         $vars = ["xy" => [$xy["x"], $xy["y"]], "bri" => $xy["brightness"], "transitiontime"=>$settings["transition"]];
         $response = put($bridge["ip"], $bridge["username"], "lights/".$lightId."/state", $vars);
@@ -116,6 +109,7 @@ function sun($lightId, $sunSetting, $state) {
 
   } elseif ($sunSetting["colour_mode"]=="temp") {
 
+    // Do we need to adjust the colour temperature?
     if ( $outcome != $state["ct"] ) {
 
       echo "  Adjusting colour temperature to ".$state["ct"]."\n";
@@ -135,11 +129,6 @@ function sun($lightId, $sunSetting, $state) {
     }
 
   }
-
-//  $xy = rgbToXY(50, 255, 98);
-
-  //$rgb =  XYtoRgb($xy["x"] ,$xy["y"] , $xy["brightness"]);
-
 
 }
 

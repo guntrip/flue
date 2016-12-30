@@ -115,15 +115,32 @@ function put($ip, $username, $addr, $vars) {
 
   function blend($setting, $percentage, $dir) {
 
-
     if ($setting["colour_mode"]=="temp") {
 
-      $difference = $setting["night"] - $setting["day"];
+      if ($dir=="sunset") {
 
-      return round($setting["day"] + ($difference*$percentage) );
+        $difference = $setting["night"] - $setting["day"];
+        return round($setting["day"] + ($difference*$percentage) );
+
+      } else {
+
+        $difference = $setting["night"] - $setting["day"];
+        return round($setting["night"] - ($difference*$percentage) );
+
+      }
 
     } elseif ($setting["colour_mode"]=="rgb") {
 
+      // This could be improved to conserve brightness? It gets dull in the middle :(
+
+      if ($dir=="sunset") { $targetRgb=$setting["night"]; $previousRgb=$setting["day"]; }
+      if ($dir=="sunrise") { $targetRgb=$setting["day"]; $previousRgb=$setting["night"]; }
+
+      $rgb["r"] = round($previousRgb["r"] - (($previousRgb["r"] - $targetRgb["r"]) * $percentage));
+      $rgb["g"] = round($previousRgb["g"] - (($previousRgb["g"] - $targetRgb["g"]) * $percentage));
+      $rgb["b"] = round($previousRgb["b"] - (($previousRgb["b"] - $targetRgb["b"]) * $percentage));
+
+      return $rgb;
 
     }
 
