@@ -1,6 +1,6 @@
 # Flue
 
-Flue is a PHP script that can set the RGB or colour temperature of your Hue lightbulbs depending on the time of day. It provides settings per bulb.
+Flue is a PHP script that can set the RGB or colour temperature of your Phillips Hue lightbulbs depending on the time of day. It provides settings per bulb.
 
 ### Installing
 
@@ -13,7 +13,7 @@ You can run Flue with `php fluebot.php`. I recommend setting up a cron job to ru
 
 ### Configuration
 
-The setting live in `settings.php`. You can define each of the bulbs you want Flue to fiddle with in the `lights` array:
+The settings live in `settings.php`. You can define each of the bulbs you want Flue to fiddle with in the `lights` array:
 
 ```php
 "1" => [ "nickname" => "Ceiling",
@@ -39,7 +39,7 @@ are explained below:
 | night          | Colour when the sun is down.                                                                                                                       |
 | minutes        | How many minutes the sunset will last, Flue will slowly blend the colours.                                                                         |
 | sunrise_before | Number of minutes to bring sunrise forward. If you wake up early, like I do, it's nice to blast yourself with daylight.                            |
-| night_link     | If this bulb should only be lit when another is in `night` mode (or shifting to it), reference the bulb's id in an array here: `["light"=>1]`.     |
+| night_link     | If this bulb should only be lit when another is in `night` mode (or shifting to it), reference the bulb's id in an array here: `["light"=>1]`. It will be switched off during daytime hours.     |
 
 There are also some global settings:
 
@@ -49,7 +49,7 @@ There are also some global settings:
 | long       | Longitude of where you are.                                                                                                                                                                                                      |
 | lat        | The latitude of where you are.                                                                                                                                                                                                   |
 | zenneth    | Angle of the sun at sunset and sunrise. It's safe to leave this as it is.                                                                                                                                                        |
-| transition | Flue will change bulb colours in steps, each time it is run, over the course of the `minutes` setting. This defines how long, in multiples of 100ms, each of those steps should transition for. 50 is 4 seconds and is pleasant. |
+| transition | This defines how long, in multiples of 100ms, each of change should transition for. 50 is 4 seconds and is pleasant. Flue will change bulb colours in steps, each time it is run, over the course of the `minutes` setting but this allows you to specify how jarring those steps should be. |
 
 ### Control via a browser
 
