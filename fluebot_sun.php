@@ -7,7 +7,7 @@ function sun($lightId, $sunSetting, $state) {
   echo "  Sun mode\n";
 
   $currentRgb = XYtoRgb($state["xy"][0], $state["xy"][1], $state["bri"]);
-  print_r($currentRgb);
+  //print_r($currentRgb);
   //print_r($state);
 
   $time=time();
