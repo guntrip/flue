@@ -113,4 +113,20 @@ function put($ip, $username, $addr, $vars) {
     }
   }
 
+  function blend($setting, $percentage, $dir) {
+
+
+    if ($setting["colour_mode"]=="temp") {
+
+      $difference = $setting["night"] - $setting["day"];
+
+      return round($setting["day"] + ($difference*$percentage) );
+
+    } elseif ($setting["colour_mode"]=="rgb") {
+
+
+    }
+
+  }
+
 ?>

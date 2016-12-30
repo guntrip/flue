@@ -4,7 +4,10 @@ function sun($lightId, $sunSetting, $state) {
 
   global $bridge, $settings;
 
-  echo "  sun mode\n";
+  echo "  Sun mode\n";
+
+  $time=time();
+  $time = strtotime("2016-12-31 07:50");
 
   $vars=["hue"=>33582, "xy"=>[0.3476,0.3574]];
 
@@ -18,57 +21,119 @@ function sun($lightId, $sunSetting, $state) {
   $offset = ($timezone->getOffset($dt) - $server->getOffset($server_dt)) / 3600;
 
   // Calculate sunset and when to begin.
-  $sunset = date_sunset(time(), SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
+  $sunset = date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
   $start = $sunset - ($sunSetting["minutes"]*60);
-  $next_sunset = strtotime(date("C",$sunset) . ' +1 day');
+  $next_sunset = $sunset + 86400;
 
   // Calculate sunrise for current day and when to begin that shift
-  $sunrise = date_sunrise(time(), SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
+  $sunrise = date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $settings["long"], $settings["lat"], $settings["zenneth"], $offset);
 
     // If the sun has risen today, we want the sunrise for *tomorrow*
     $minutes_after_midnight = date("h")*60 + date("i");
     $sunrise_after_midnight = date("h", $sunrise)*60 + date("i", $sunrise);
     if ( ($minutes_after_midnight>$sunrise_after_midnight) && ($minutes_after_midnight<1440) ) {
-      $sunrise = strtotime(date("C",$sunrise) . ' +1 day');
+      $sunrise = $sunrise + 86400;
     }
 
   $end = $sunrise - ($sunSetting["sunrise_before"]*60);
 
-  echo "  sunset at ".date("dS H:i", $sunset)." (-".$sunSetting["minutes"]." minutes)\n";
-  echo "  next sunrise at ".date("dS H:i", $sunrise)." (-".$sunSetting["sunrise_before"]." minutes)\n";
+  echo "  Sunset at ".date("dS H:i", $sunset)." (-".$sunSetting["minutes"]." minutes)\n";
+  echo "  Next sunrise at ".date("dS H:i", $sunrise)." (-".$sunSetting["sunrise_before"]." minutes)\n";
+  echo "  Next sunset at ".date("dS H:i", $next_sunset)."\n";
+  echo "  Current time: ".date("H:i", $time)." - ";
 
-  if ( (time() > $start) && (time() < $end) ) {
-    echo "  ".date("H:i")." - sunset\n";
+  if ( ($time > $start) && ($time < $end) ) {
+
+    if ( $time < $sunset ) {
+
+      // Sun is setting, blend!
+      $percentage = 1-(($sunset-$time)/($sunSetting["minutes"]*60));
+      echo "Sun is setting (".round($percentage*100)."% complete)\n";
+
+      $outcome = blend($sunSetting, $percentage, "sunset");
+
+    } else {
+
+      // Sun has set. Simple.
+      echo "Night\n";
+      $outcome = $sunSetting["night"];
+
+    }
 
 
-  } elseif ( (time()>$end) && (time()<$next_sunset) ) {
-    echo "  ".date("H:i")." - sunrise\n";
+  } elseif ( ($time>$end) && ($time<$next_sunset) ) {
+
+
+    if ($time > $sunrise) {
+
+      // Sun has risen, simple.
+      echo "Day\n";
+      $outcome = $sunSetting["day"];
+
+    } else {
+
+      // Sun is rising!
+      $percentage = 1-(($sunrise-$time)/($sunSetting["sunrise_before"]*60));
+      echo "Sun is rising (".round($percentage*100)."% complete)\n";
+
+      //$outcome = blend($sunSetting, $percentage, "sunset");
+
+    }
 
 
   } else {
-    echo "  ".date("H:i")." - day\n";
+    echo "Day\n";
 
-    $rgb = $sunSetting["day"];
+    $outcome = $sunSetting["day"];
 
   }
 
-  if (!rgbMatch($rgb, $currentRgb)) {
+  if (!isset($outcome)) {
+    echo "  Error: couldn't decide on a colour, skipping.\n";
+    return 0;
+  }
 
-    echo "  Adjusting to (r:".$rgb["r"].", g:".$rgb["g"].", b:".$rgb["b"].")\n";
+  if ($sunSetting["colour_mode"]=="rgb") {
 
-    $xy=rgbToXY($rgb);
-    $vars = ["xy" => [$xy["x"], $xy["y"]], "bri" => $xy["brightness"]];
-    $response = put($bridge["ip"], $bridge["username"], "lights/".$lightId."/state", $vars);
+      if (!rgbMatch($outcome, $currentRgb)) {
 
-    if (($response[0]["success"])&&($response[1]["success"])) {
-      echo "  successful!\n";
+        echo "  Adjusting to (r:".$outcome["r"].", g:".$outcome["g"].", b:".$outcome["b"].")\n";
+
+        $xy=rgbToXY($outcome);
+        $vars = ["xy" => [$xy["x"], $xy["y"]], "bri" => $xy["brightness"], "transitiontime"=>$settings["transition"]];
+        $response = put($bridge["ip"], $bridge["username"], "lights/".$lightId."/state", $vars);
+
+        if (($response[0]["success"])&&($response[1]["success"])&&($response[2]["success"])) {
+          echo "  Successful!\n";
+        } else {
+          echo "  Error? Check output below:\n";
+          print_r($response);
+        }
+
+      } else {
+        echo "  Light already set correctly\n";
+      }
+
+  } elseif ($sunSetting["colour_mode"]=="temp") {
+
+    if ( $outcome != $state["ct"] ) {
+
+      echo "  Adjusting colour temperature to ".$state["ct"]."\n";
+
+      $vars = ["ct"=>$outcome, "transitiontime"=>$settings["transition"]];
+      $response = put($bridge["ip"], $bridge["username"], "lights/".$lightId."/state", $vars);
+
+      if (($response[0]["success"])&&($response[1]["success"])) {
+        echo "  Successful!\n";
+      } else {
+        echo "  Error? Check output below:\n";
+        print_r($response);
+      }
+
     } else {
-      echo "  error? Check output below:\n";
-      print_r($response);
+      echo "  Light already set correctly\n";
     }
 
-  } else {
-    echo "  Light already set correctly\n";
   }
 
 //  $xy = rgbToXY(50, 255, 98);
