@@ -2,14 +2,16 @@
 
 function sun($lightId, $sunSetting, $state) {
 
-  global $bridge, $settings;
+  global $bridge, $settings, $light_modes;
 
   echo "  Sun mode\n";
 
   $currentRgb = XYtoRgb($state["xy"][0], $state["xy"][1], $state["bri"]);
+  print_r($currentRgb);
+  //print_r($state);
 
   $time=time();
-  //$time = strtotime("2016-12-31 07:30"); // for fiddling.
+  //$time = strtotime("2016-12-31 18:30"); // for fiddling.
 
   // Are we in daylight savings? :C Also calculates offset for other regions.
   $timezone = new DateTimeZone($settings["timezone"]);
@@ -54,10 +56,13 @@ function sun($lightId, $sunSetting, $state) {
 
     }
 
+    $light_modes[$lightId]="night";
+
   } elseif ( ($now>0) && ($now<$sunrise_start) ) { // After midnight, before sunrise.
 
     echo "Night\n";
     $outcome = $sunSetting["night"];
+    $light_modes[$lightId]="night";
 
   } elseif ( ($now>=$sunrise_start) && ($now<$sunset_start) ) { // After sunrise start, before sunset.
 
@@ -73,6 +78,8 @@ function sun($lightId, $sunSetting, $state) {
       $outcome = blend($sunSetting, $percentage, "sunrise");
 
     }
+
+    $light_modes[$lightId]="day";
 
   }
 
