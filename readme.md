@@ -35,9 +35,31 @@ are explained below:
 | colour_mode    | Use `temp` to provide a colour temperature or `rgb`.                                                                                               |
 | day            | Colour when the sun is up. Provide either a colour temperature (153 to 500) or, if using rgb, an array such as `["r"=>123, "g"=> 142, "b" => 145]` |
 | night          | Colour when the sun is down.                                                                                                                       |
+| brightness     | An array - `["day"=>254, "night"=>150]`. If using colour temperature, you can choose the brightness. This will also be blended.                    |
 | minutes        | How many minutes the sunset will last, Flue will slowly blend the colours.                                                                         |
 | sunrise_before | Number of minutes to bring sunrise forward. If you wake up early, like I do, it's nice to blast yourself with daylight.                            |
 | night_link     | If this bulb should only be lit when another is in `night` mode (or shifting to it), reference the bulb's id in an array here: `["light"=>1]`. It will be switched off during daytime hours.     |
+
+
+While the Hue API won't tell us what the current scene is, we can react to specific bulb states. If you want Flue to leave your bulbs alone when they're in a certain state, you can use the `disable_on` setting:
+
+```php
+"disable_on" => [ "film" => ["bulb" => "1",
+                             "check" => "rgb",
+                             "check_for" => ["r"=>98, "g"=>72, "b"=>30],
+                             //"check_bri" => 20,
+                             "disable" => ["1", "2", "3"] ] ]
+```
+
+You can have any number of rules, the index is the rule name which is useful for debugging. You can find your current bulb states by using the `status.php` script:
+
+| Setting   | Description                                                                     |
+|-----------|---------------------------------------------------------------------------------|
+| bulb      | The bulb ID.                                                                    |
+| check     | Either `rgb` or `ct` (colour temperature).                                      |
+| check_for | Either an rgb array (`["r"=>255, "g"=>155, "b"=>3]`) or the colour temperature. |
+| check_bri | Brightness to check for *if* using colour temperature.                          |
+| disable   | Array of bulb IDs to skip.                                                      |
 
 There are also some global settings:
 
@@ -51,4 +73,4 @@ There are also some global settings:
 
 ### Control via a browser
 
-If you also run a web server, you can visit `index.php` for an on/off switch and a "manual" mode.
+If you also run a web server, you can visit `index.php` for an on/off switch and a "manual" mode, a "status" output and the option to override the `disable_on` setting.

@@ -20,8 +20,10 @@ $lights_off = [];
 $lights_special = [];
 $light_modes=[];
 
-$disable = check_disable($lights);
-foreach ($disable as $id) { unset($settings["lights"][$id]); }
+if ($_GET["force"]!="1") {
+  $disable = check_disable($lights);
+  foreach ($disable as $id) { unset($settings["lights"][$id]); }
+}
 
 // Loop through $settings["lights"]
 foreach ($settings["lights"] as $lightId => $light) {

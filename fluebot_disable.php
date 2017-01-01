@@ -16,7 +16,7 @@ function check_disable($lights) {
 
       if ($check["check"]=="ct") {
 
-        if ($check["check_for"]==$bulb["state"]["ct"]) {
+        if (($check["check_for"]==$bulb["state"]["ct"])&&($check["check_bri"]==$bulb["state"]["bri"])) {
 
           echo "!! ".$reason." disable rule met.\n";
           echo "!! skipping ".implode($check["disable"],",")."\n";
@@ -44,7 +44,7 @@ function check_disable($lights) {
 
   }
 
-  return $disable;
+  return array_unique($disable);
 
 }
 

@@ -52,6 +52,7 @@ if ($switches["enabled"]) {
 }
 
 echo "<a href=\"?manual=1\">Manual</a>, ".
+     "<a href=\"?force=1&manual=1\">Force</a>, ".
      "<a href=\"?status=1\">Status</a>";
 
 ?>

@@ -11,7 +11,7 @@ function sun($lightId, $sunSetting, $state) {
   //print_r($state);
 
   $time=time();
-  //$time = strtotime("2016-12-31 18:30"); // for fiddling.
+  //$time = strtotime("2017-01-15 16:05"); // for fiddling.
 
   // Are we in daylight savings? :C Also calculates offset for other regions.
   $timezone = new DateTimeZone($settings["timezone"]);
@@ -38,6 +38,7 @@ function sun($lightId, $sunSetting, $state) {
   $now = date("H", $time)*60 + date("i", $time);
 
   echo "  Current status: ".date("H:i", $time)." - ";
+  $mode = "";
 
   // Figure out the rgb or colour temperature to use.
 
@@ -48,11 +49,13 @@ function sun($lightId, $sunSetting, $state) {
       $percentage = 1-(($sunset-$now)/($sunSetting["minutes"]));
       echo "Sun is setting (".round($percentage*100)."% complete)\n";
       $outcome = blend($sunSetting, $percentage, "sunset");
+      $mode="day-night";
 
     } else { // Sun has set. Simple.
 
       echo "Night*\n";
       $outcome = $sunSetting["night"];
+      $mode="night";
 
     }
 
@@ -63,6 +66,7 @@ function sun($lightId, $sunSetting, $state) {
     echo "Night\n";
     $outcome = $sunSetting["night"];
     $light_modes[$lightId]="night";
+    $mode="night";
 
   } elseif ( ($now>=$sunrise_start) && ($now<$sunset_start) ) { // After sunrise start, before sunset.
 
@@ -70,12 +74,14 @@ function sun($lightId, $sunSetting, $state) {
 
       echo "Day\n";
       $outcome = $sunSetting["day"];
+      $mode="day";
 
     } else { // Sun is rising. Blend!
 
       $percentage = 1-(($sunrise-$now)/($sunSetting["minutes"]));
       echo "Sun is rising (".$percentage." - ".round($percentage*100)."% complete)\n";
       $outcome = blend($sunSetting, $percentage, "sunrise");
+      $mode="day-night";
 
     }
 
@@ -122,6 +128,15 @@ function sun($lightId, $sunSetting, $state) {
       echo "  Adjusting colour temperature to ".$state["ct"]."\n";
 
       $vars = ["ct"=>$outcome, "transitiontime"=>$settings["transition"]];
+
+      if ($sunSetting["brightness"]["day"]) {
+        if ($mode=="day") $vars["bri"]=$sunSetting["brightness"]["day"];
+        if ($mode=="night") $vars["bri"]=$sunSetting["brightness"]["night"];
+        if ($mode=="day-night") $vars["bri"]=round($sunSetting["brightness"]["day"] - (($sunSetting["brightness"]["day"] - $sunSetting["brightness"]["night"]) * $percentage));
+        if ($mode=="night-day") $vars["bri"]=round($sunSetting["brightness"]["night"] - (($sunSetting["brightness"]["night"] - $sunSetting["brightness"]["day"]) * $percentage));
+        echo "  Changing brightness to ".$vars["bri"];
+      }
+
       $response = put($bridge["ip"], $bridge["username"], "lights/".$lightId."/state", $vars);
 
       if (($response[0]["success"])&&($response[1]["success"])) {

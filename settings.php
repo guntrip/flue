@@ -9,6 +9,7 @@
                                        //"night" => ["r"=>0, "g"=> 255, "b" =>12],
                                        "day" => 165,
                                        "night" => 468,
+                                       "brightness" => ["day"=>244, "night"=>165],
                                        "minutes" => 25, // minutes before sunset to begin fade
                                        "sunrise_before" => 100], // minutes to move sunrise earlier, use to force day mode
 
@@ -30,8 +31,9 @@
                                        "night_link"=>["light"=>1]]
                             ],
                 "disable_on" => [ "film" => ["bulb" => "1",
-                                             "check" => "ct",
-                                             "check_for" => 165,
+                                             "check" => "rgb",
+                                             "check_for" => ["r"=>98, "g"=>72, "b"=>30],
+                                             //"check_bri" => 20,
                                              "disable" => ["1", "2", "3"] ] ],
 
                 "timezone" => "Europe/London",
