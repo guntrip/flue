@@ -35,6 +35,8 @@ are explained below:
 
 The settings below are for the `sun` mode. This will adjust your bulbs depending on the sun's position in the sky:
 
+| Setting        | Description                                                                                                                                        |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | colour_mode    | Use `temp` to provide a colour temperature or `rgb`.                                                                                               |
 | day            | Colour when the sun is up. Provide either a colour temperature (153 to 500) or, if using rgb, an array such as `["r"=>123, "g"=> 142, "b" => 145]` |
 | night          | Colour when the sun is down.                                                                                                                       |
