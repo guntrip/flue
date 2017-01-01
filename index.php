@@ -35,6 +35,14 @@ if ($_GET["manual"]==1) {
 
 }
 
+if ($_GET["status"]==1) {
+
+  echo "<pre>";
+    include "status.php";
+  echo "</pre>";
+
+}
+
 if ($switches["enabled"]) {
   echo "<h4>Enabled.</h4>";
   echo "<h4><a href=\"?on=0\">Switch off :(</a></h4>";
@@ -43,7 +51,8 @@ if ($switches["enabled"]) {
   echo "<h4><a href=\"?on=1\">Switch on :3</a></h4>";
 }
 
-echo "<a href=\"?manual=1\">Manual</a>";
+echo "<a href=\"?manual=1\">Manual</a>, ".
+     "<a href=\"?status=1\">Status</a>";
 
 ?>
 </body>

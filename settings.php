@@ -24,11 +24,16 @@
                                        "mode" => "sun",
                                        "colour_mode" => "rgb",
                                        "day" => ["r"=>255, "g"=> 208, "b" => 197],
-                                       "night" => ["r"=>255, "g"=> 187, "b" =>167],
+                                       "night" => ["r"=>206, "g"=> 123, "b" =>68],
                                        "minutes" => 25,
                                        "sunrise_before" => 100,
                                        "night_link"=>["light"=>1]]
                             ],
+                "disable_on" => [ "film" => ["bulb" => "1",
+                                             "check" => "ct",
+                                             "check_for" => 165,
+                                             "disable" => ["1", "2", "3"] ] ],
+
                 "timezone" => "Europe/London",
                 "long" => 50.614429,
                 "lat" => -2.457621,

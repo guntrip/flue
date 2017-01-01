@@ -12,12 +12,16 @@ if (!$switches["enabled"]) { echo "Disabled\n"; exit; }
 include "functions.php";
 include "settings.php";
 include "fluebot_sun.php";
+include "fluebot_disable.php";
 
 // Get light status.
 $lights = get($bridge["ip"], $bridge["username"], "lights");
 $lights_off = [];
 $lights_special = [];
 $light_modes=[];
+
+$disable = check_disable($lights);
+foreach ($disable as $id) { unset($settings["lights"][$id]); }
 
 // Loop through $settings["lights"]
 foreach ($settings["lights"] as $lightId => $light) {
