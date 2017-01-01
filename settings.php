@@ -9,7 +9,7 @@
                                        //"night" => ["r"=>0, "g"=> 255, "b" =>12],
                                        "day" => 165,
                                        "night" => 468,
-                                       "brightness" => ["day"=>244, "night"=>165],
+                                       "brightness" => ["day"=>254, "night"=>240],
                                        "minutes" => 25, // minutes before sunset to begin fade
                                        "sunrise_before" => 100], // minutes to move sunrise earlier, use to force day mode
 
@@ -28,7 +28,26 @@
                                        "night" => ["r"=>206, "g"=> 123, "b" =>68],
                                        "minutes" => 25,
                                        "sunrise_before" => 100,
-                                       "night_link"=>["light"=>1]]
+                                       "night_link"=>["light"=>1]],
+
+                               "4" => [ "nickname" => "steve_bulb",
+                                        "mode" => "nightlight",
+                                        "start" => 1320,
+                                        "end" => 240,//240,
+                                        "after_midnight" => true,
+                                        "starting_brightness" => 150,
+                                        "duration" => 30,
+                                        "ct" => 468],
+
+                              "5" => [ "nickname" => "bry_bulb",
+                                       "mode" => "nightlight",
+                                       "start" => 1260,
+                                       "end" => 240,//240,
+                                       "after_midnight" => true,
+                                       "starting_brightness" => 150,
+                                       "duration" => 30,
+                                       "ct" => 468],
+
                             ],
                 "disable_on" => [ "film" => ["bulb" => "1",
                                              "check" => "rgb",

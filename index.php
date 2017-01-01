@@ -25,6 +25,14 @@ if (isset($_GET["on"])) {
 
 }
 
+if (isset($_GET["clearNightlight"])) {
+
+    $switches["nightlight"]=[];
+    file_put_contents("switches.json", json_encode($switches));
+    echo "Night light cleared.";
+
+}
+
 echo "<h3>Fluebot</h3>";
 
 if ($_GET["manual"]==1) {

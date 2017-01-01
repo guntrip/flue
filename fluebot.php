@@ -13,6 +13,7 @@ include "functions.php";
 include "settings.php";
 include "fluebot_sun.php";
 include "fluebot_disable.php";
+include "fluebot_nightlight.php";
 
 // Get light status.
 $lights = get($bridge["ip"], $bridge["username"], "lights");
@@ -44,6 +45,7 @@ foreach ($settings["lights"] as $lightId => $light) {
 
           // Things we do with lights that are on!
           if ($light["mode"]=="sun") { sun($lightId, $light, $state); }
+          if ($light["mode"]=="nightlight") { nightlight($lightId, $light, $state); }
 
           // Is there a night link? If so, we might need to turn it off.
           if (isset($light["night_link"])) {  $lights_special[$lightId] = $state; }
@@ -86,5 +88,7 @@ foreach ($lights_special as $lightId => $state) {
   }
 
 }
+
+if (sizeof($lights_special)) { nightlight_off($lights_special); }
 
 ?>

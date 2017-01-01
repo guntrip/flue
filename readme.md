@@ -31,7 +31,10 @@ are explained below:
 | Setting        | Description                                                                                                                                        |
 |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | nickname       | This is only used for a friendlier debugging experience.                                                                                           |
-| mode           | Allows for more modes in future. Currently the only mode is `sun`, adjusting the colours depending on where the sun is.                            |
+| mode           | Which mode to manage this bulb in? Either `sun` or `nightlight`                           |
+
+The settings below are for the `sun` mode. This will adjust your bulbs depending on the sun's position in the sky:
+
 | colour_mode    | Use `temp` to provide a colour temperature or `rgb`.                                                                                               |
 | day            | Colour when the sun is up. Provide either a colour temperature (153 to 500) or, if using rgb, an array such as `["r"=>123, "g"=> 142, "b" => 145]` |
 | night          | Colour when the sun is down.                                                                                                                       |
@@ -40,6 +43,16 @@ are explained below:
 | sunrise_before | Number of minutes to bring sunrise forward. If you wake up early, like I do, it's nice to blast yourself with daylight.                            |
 | night_link     | If this bulb should only be lit when another is in `night` mode (or shifting to it), reference the bulb's id in an array here: `["light"=>1]`. It will be switched off during daytime hours.     |
 
+These settings are for `nightlight`, this will slowly dim your bulbs to off whenever you turn them in during a specific timeframe:
+
+| Setting             | Description                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------|
+| start               | Time in minutes (after midnight) that Flue should check for this bulb being switched on |
+| end                 | Time in minutes (after midnight) to stop checking                                       |
+| after_midnight      | true/false. Is your `end` time after midnight?                                          |
+| starting_brightness | How bright to initially dim the bulb?                                                   |
+| duration            | How long before switching off.                                                          |
+| ct                  | Colour temperature                                                                      |
 
 While the Hue API won't tell us what the current scene is, we can react to specific bulb states. If you want Flue to leave your bulbs alone when they're in a certain state, you can use the `disable_on` setting:
 
