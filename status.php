@@ -55,4 +55,8 @@ foreach ($lights as $id => $light) {
 
 }
 
+if (!file_exists("switches.json")) { echo "switches.json not found. Run on.php.\n"; exit; }
+$switches=json_decode(file_get_contents("switches.json"),true);
+print_r($switches);
+
  ?>

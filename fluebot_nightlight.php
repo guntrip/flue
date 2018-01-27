@@ -12,6 +12,7 @@ function nightlight($lightId, $sunSetting, $state) {
   // What is the current time in minutes after midnight?
   $time = time();
   //$time = strtotime("2017-01-16 23:58"); // for fiddling.
+
   $timestamp=$time;
   $minutesAfterMidnight=date("H", $time)*60 + date("i", $time);
 
@@ -43,14 +44,14 @@ function nightlight($lightId, $sunSetting, $state) {
       // Have they /just/ been switched off?
       if ( $switches["nightlight"][$lightId]["switchedOffAt"] ) {
         $gap = $switches["nightlight"][$lightId]["switchedOffAt"] - $timestamp;
-        if ($gap < 45) {
+        if ( ($gap < 45) && ($gap>0) ) {
           echo "  Switched off $gap seconds ago.\n";
           return 0;
         }
       }
 
       // Start
-      $switches["nightlight"]=[$lightId => ["active"=>true, "started"=>$timestamp]];
+      $switches["nightlight"][$lightId] = ["active"=>true, "started"=>$timestamp];
       $percentage=1;
       echo "  Starting!! Progress: 100%\n";
 

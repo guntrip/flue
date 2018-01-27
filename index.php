@@ -63,6 +63,10 @@ echo "<a href=\"?manual=1\">Manual</a>, ".
      "<a href=\"?force=1&manual=1\">Force</a>, ".
      "<a href=\"?status=1\">Status</a>";
 
+echo "<p><a href=\"?clearNightlight=1\">Reset nightlights</a>";
+
+echo "<p><a href=\"dnd.php\">d&d mode</a>";
+
 ?>
 </body>
 </html>

@@ -9,11 +9,14 @@ $switches=json_decode(file_get_contents("switches.json"),true);
 
 if (!$switches["enabled"]) { echo "Disabled\n"; exit; }
 
-include "functions.php";
-include "settings.php";
-include "fluebot_sun.php";
-include "fluebot_disable.php";
-include "fluebot_nightlight.php";
+if (!function_exists("rgbToXY")) {
+  include "functions.php";
+  include "settings.php";
+}
+  include "fluebot_sun.php";
+  include "fluebot_disable.php";
+  include "fluebot_nightlight.php";
+
 
 // Get light status.
 $lights = get($bridge["ip"], $bridge["username"], "lights");
@@ -36,6 +39,7 @@ foreach ($settings["lights"] as $lightId => $light) {
 
     if (!$state["reachable"]) {
       echo "unreachable\n";
+      $lights_special[$lightId]=$state;
     } else {
 
       if ($state["on"]) { echo "on"; } else { echo "off"; }

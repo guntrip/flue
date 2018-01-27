@@ -2,7 +2,7 @@
 
 function sun($lightId, $sunSetting, $state) {
 
-  global $bridge, $settings, $light_modes;
+  global $bridge, $settings, $light_modes, $force_adjust;
 
   echo "  Sun mode\n";
 
@@ -11,7 +11,7 @@ function sun($lightId, $sunSetting, $state) {
   //print_r($state);
 
   $time=time();
-  //$time = strtotime("2017-01-15 16:05"); // for fiddling.
+  //$time = strtotime("2017-01-15 17:40"); // for fiddling.
 
   // Are we in daylight savings? :C Also calculates offset for other regions.
   $timezone = new DateTimeZone($settings["timezone"]);
@@ -100,7 +100,7 @@ function sun($lightId, $sunSetting, $state) {
   if ($sunSetting["colour_mode"]=="rgb") {
 
       // Calculate current RGB and see if we *need* to change anything
-      if (!rgbMatch($outcome, $currentRgb)) {
+      if ((!rgbMatch($outcome, $currentRgb))|| ($force_adjust)) {
 
         echo "  Adjusting to (r:".$outcome["r"].", g:".$outcome["g"].", b:".$outcome["b"].")\n";
 
@@ -123,7 +123,7 @@ function sun($lightId, $sunSetting, $state) {
   } elseif ($sunSetting["colour_mode"]=="temp") {
 
     // Do we need to adjust the colour temperature?
-    if ( $outcome != $state["ct"] ) {
+    if ( ($outcome != $state["ct"]) || ($force_adjust) ) {
 
       echo "  Adjusting colour temperature to ".$state["ct"]."\n";
 

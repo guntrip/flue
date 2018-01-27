@@ -59,7 +59,8 @@
                 "long" => 50.614429,
                 "lat" => -2.457621,
                 "zenneth" => 90.583333,
-                "transition" => 50 // transition time, multiples of 100ms - 50
+                "transition" => 50, // transition time, multiples of 100ms - 50,
+                "dnd_lights" => ["1", "2", "3"]
               ]
 
 ?>
